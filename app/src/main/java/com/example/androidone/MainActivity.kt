@@ -1,7 +1,9 @@
-// app/src/main/java/com/example/androidone/MainActivity.kt
 package com.example.androidone
 
 import android.os.Bundle
+import android.view.ContextMenu
+import android.view.MenuItem
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +18,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var db: AppDatabase
     private lateinit var taskAdapter: TaskAdapter
     private lateinit var recyclerView: RecyclerView
+    private var selectedTask: Task? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         db = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java, "task-database"
-        ).fallbackToDestructiveMigration() // Add this line
+        ).fallbackToDestructiveMigration()
          .build()
 
         val etDescription = findViewById<EditText>(R.id.etDescription)
@@ -45,15 +48,42 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        registerForContextMenu(recyclerView)
     }
 
     private fun loadTasks() {
         thread {
             val tasks = db.taskDao().getAllTasks()
             runOnUiThread {
-                taskAdapter = TaskAdapter(tasks)
+                taskAdapter = TaskAdapter(tasks) { task ->
+                    selectedTask = task
+                    openContextMenu(recyclerView)
+                }
                 recyclerView.adapter = taskAdapter
             }
+        }
+    }
+
+    override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        menuInflater.inflate(R.menu.context_menu, menu)
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.delete -> {
+                selectedTask?.let { task ->
+                    thread {
+                        db.taskDao().deleteTask(task)
+                        runOnUiThread {
+                            loadTasks()
+                        }
+                    }
+                }
+                true
+            }
+            else -> super.onContextItemSelected(item)
         }
     }
 }
