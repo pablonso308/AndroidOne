@@ -4,5 +4,5 @@
         android:title="Delete" />
     <item
         android:id="@+id/mark_complete"
-        android:title="Mark as Complete" />
+        android:title="Hecha" />
 </menu>

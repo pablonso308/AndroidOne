@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/androidone/MainActivity.kt
 package com.example.androidone
 
 import android.os.Bundle
@@ -35,6 +34,8 @@ class MainActivity : AppCompatActivity() {
 
         val etDescription = findViewById<EditText>(R.id.etDescription)
         val btnSave = findViewById<Button>(R.id.btnSave)
+        val btnShowPending = findViewById<Button>(R.id.btnShowPending)
+        val btnShowCompleted = findViewById<Button>(R.id.btnShowCompleted)
         recyclerView = findViewById(R.id.recyclerView)
         completedRecyclerView = findViewById(R.id.completedRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -52,6 +53,16 @@ class MainActivity : AppCompatActivity() {
                     loadTasks()
                 }
             }
+        }
+
+        btnShowPending.setOnClickListener {
+            recyclerView.visibility = View.VISIBLE
+            completedRecyclerView.visibility = View.GONE
+        }
+
+        btnShowCompleted.setOnClickListener {
+            recyclerView.visibility = View.GONE
+            completedRecyclerView.visibility = View.VISIBLE
         }
 
         registerForContextMenu(recyclerView)

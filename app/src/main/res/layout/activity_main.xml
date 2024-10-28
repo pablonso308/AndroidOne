@@ -17,6 +17,18 @@
         android:layout_height="wrap_content"
         android:text="Save" />
 
+    <Button
+        android:id="@+id/btnShowPending"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Show Pending Tasks" />
+
+    <Button
+        android:id="@+id/btnShowCompleted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Show Completed Tasks" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
@@ -27,5 +39,6 @@
         android:id="@+id/completedRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:visibility="gone" />
 </LinearLayout>
