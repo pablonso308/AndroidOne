@@ -1,3 +1,4 @@
+// app/src/main/java/com/example/androidone/MainActivity.kt
 package com.example.androidone
 
 import android.os.Bundle
@@ -17,7 +18,9 @@ import kotlin.concurrent.thread
 class MainActivity : AppCompatActivity() {
     private lateinit var db: AppDatabase
     private lateinit var taskAdapter: TaskAdapter
+    private lateinit var completedTaskAdapter: TaskAdapter
     private lateinit var recyclerView: RecyclerView
+    private lateinit var completedRecyclerView: RecyclerView
     private var selectedTask: Task? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +36,9 @@ class MainActivity : AppCompatActivity() {
         val etDescription = findViewById<EditText>(R.id.etDescription)
         val btnSave = findViewById<Button>(R.id.btnSave)
         recyclerView = findViewById(R.id.recyclerView)
+        completedRecyclerView = findViewById(R.id.completedRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
+        completedRecyclerView.layoutManager = LinearLayoutManager(this)
 
         loadTasks()
 
@@ -55,12 +60,18 @@ class MainActivity : AppCompatActivity() {
     private fun loadTasks() {
         thread {
             val tasks = db.taskDao().getAllTasks()
+            val completedTasks = db.taskDao().getCompletedTasks()
             runOnUiThread {
-                taskAdapter = TaskAdapter(tasks) { task ->
+                taskAdapter = TaskAdapter(tasks.filter { !it.isCompleted }) { task ->
                     selectedTask = task
                     openContextMenu(recyclerView)
                 }
+                completedTaskAdapter = TaskAdapter(completedTasks) { task ->
+                    selectedTask = task
+                    openContextMenu(completedRecyclerView)
+                }
                 recyclerView.adapter = taskAdapter
+                completedRecyclerView.adapter = completedTaskAdapter
             }
         }
     }
@@ -76,6 +87,18 @@ class MainActivity : AppCompatActivity() {
                 selectedTask?.let { task ->
                     thread {
                         db.taskDao().deleteTask(task)
+                        runOnUiThread {
+                            loadTasks()
+                        }
+                    }
+                }
+                true
+            }
+            R.id.mark_complete -> {
+                selectedTask?.let { task ->
+                    task.isCompleted = true
+                    thread {
+                        db.taskDao().updateTask(task)
                         runOnUiThread {
                             loadTasks()
                         }
